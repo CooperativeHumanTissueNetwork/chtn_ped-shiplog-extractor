@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<!-- Configure our various datasources (including connection info, etc.) -->
+	<import resource="spring-datasource.xml" />
+
+	<!-- Configure MyBatis -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="starsDatasource" />
+		<!--  <property name="typeAliasesPackage" value="nch.chtn.shiplog.extractor.persistence" /> -->
+		<property name="mapperLocations" value="classpath*:nch/chtn/shiplog/extractor/persistence/*.xml"/>
+		<!-- 
+		<property name="mapperLocations">
+			<list>
+				<value>nch/chtn/shiplog/extractor/persistence/*.xml</value>
+			</list>
+		</property>
+		 --> 
+	</bean>
+	<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg index="0" ref="sqlSessionFactory" />
+	</bean>
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="nch.chtn.shiplog.extractor.persistence" />
+	</bean>
+
+	<!-- Configure type converters (needed for timestamp parse, for example) -->
+	<import resource="spring-converters.xml" />
+	
+	<bean id="excelOutputter" class="nch.chtn.shiplog.extractor.output.ShiplogExcelOutputter">
+		<property name="filename" value="target/output/STARS_CHTN_Shiplog.xls"/>
+	</bean>
+	 
+	<!-- Configure the extractor -->
+	<bean id="extractor" class="nch.chtn.shiplog.extractor.StarsShiplogExtractor">
+		<property name="sqlSession" ref="sqlSession"/>
+		<property name="startDateTime" value="2011-12-01 00:00:00" />
+		<property name="endDateTime"   value="2011-12-31 23:59:59" />
+		<property name="outputter"     ref="excelOutputter" />
+	</bean>
+</beans>

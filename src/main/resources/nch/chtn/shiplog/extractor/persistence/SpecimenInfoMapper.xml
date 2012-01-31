@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="nch.chtn.shiplog.extractor.persistence.SpecimenInfoMapper">
+
+	<select id="selectSpecimenInfo" resultType="java.util.HashMap" parameterType="nch.chtn.shiplog.extractor.StarsShiplogExtractor">
+		select 
+			*
+		from 
+			vw_CHTN_Specimens_Shipped
+		where
+			ShipDateTime between #{startDateTime} and #{endDateTime}
+		order by
+			ShipDateTime,
+			SpecPatientUSI
+	</select>
+
+	<select id="selectDistributionProjectInfo" resultType="java.util.HashMap" parameterType="nch.chtn.shiplog.extractor.StarsShiplogExtractor">
+		select
+			DistProjectName,
+			COUNT(*) as DistCount,
+			min(ShipDateTime) as MinShipDateTime, 
+			max(ShipDateTime) as MaxShipDateTime
+		from vw_CHTN_Specimens_Shipped
+		where
+			ShipDateTime between #{startDateTime} and #{endDateTime}
+		group by
+			DistProjectName
+		order by
+			DistProjectName
+	</select>
+
+	<select id="selectReceivingInvestigatorInfo" resultType="java.util.HashMap" parameterType="nch.chtn.shiplog.extractor.StarsShiplogExtractor">
+		select
+			ShipInvestigatorName,
+			ShipToName,
+			ShipInvestigatorTissueQuestID,
+			COUNT(*) as DistCount,
+			min(ShipDateTime) as MinShipDateTime, 
+			max(ShipDateTime) as MaxShipDateTime
+		from vw_CHTN_Specimens_Shipped
+		where
+			ShipDateTime between #{startDateTime} and #{endDateTime}
+		group by
+			ShipInvestigatorName,
+			ShipToName,
+			ShipInvestigatorTissueQuestID
+		order by
+			ShipInvestigatorName,
+			ShipToName,
+			ShipInvestigatorTissueQuestID
+	</select>
+	
+</mapper>
